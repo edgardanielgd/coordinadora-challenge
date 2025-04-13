@@ -31,6 +31,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
     private static mapPrivColumns ( row : any ) : Privilege {
         return new Privilege(
+            row.prv_id,
             row.usr_id,
             row.prv_role,
           );
