@@ -3,6 +3,7 @@ import { ICreateShipmentOrderUseCase } from '../../application/use_cases/orders/
 import { AssignOrderDTO, CreateOrderDTO } from '../../application/dto/order';
 import { IAssignShipmentOrderUseCase } from '../../application/use_cases/orders/IAssignShipmentOrderUseCase';
 import { IGetShipmentOrderStateUseCase } from '../../application/use_cases/orders/IGetShipmentOrderStateUseCase';
+import { AuthPayload } from '../../application/services/IAuthService';
 
 export class OrderController {
 
@@ -21,9 +22,12 @@ export class OrderController {
   }
 
   public create = async (req : Request, res : Response, next : NextFunction) : Promise<any> => {
+
+      const senderId = (<AuthPayload>res.locals.user).user.getId();
+
       try {
         const createUserDTO : CreateOrderDTO = {
-          senderId: req.body.senderId,
+          senderId: senderId,
           receiverId: req.body.receiverId,
           productCategory: req.body.productCategory,
           weightGrams: req.body.weightGrams,

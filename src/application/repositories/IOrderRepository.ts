@@ -2,6 +2,7 @@ import { Order } from "../../domain/entities/Order";
 
 export interface IOrderRepository {
 
+    findById( id : number ) : Promise<Order | null>;
     findByShortId( shortId : string ) : Promise<Order | null>;
 
     update(

@@ -1,7 +1,6 @@
 import Joi from 'joi';
 
 export const createOrderSchema = Joi.object({
-  senderId: Joi.number().integer().required(),
   receiverId: Joi.number().integer().required(),
   productCategory: Joi.string().min(1).max(255).required(),
   weightGrams: Joi.string().min(1).max(255).required(),

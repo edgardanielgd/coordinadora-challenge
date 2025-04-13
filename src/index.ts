@@ -88,9 +88,11 @@ const orderController = new OrderController(
 const app = express();
 const server = new Server( app , {
     ip: config.ip, port: config.port, env : config.env,
-    authController, userController, orderController
+    authController, userController, orderController, authService
 });
 
 server.configServer()
 
 server.start();
+
+pool.end();

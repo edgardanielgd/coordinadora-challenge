@@ -1,9 +1,12 @@
 import { OrderController } from '../../../interfaces/controllers/orderController';
 import { createOrderSchema, assignOrderSchema } from '../../joi/orderSchema';
 import { validate } from '../middlewares/validate';
+import { authenticate } from '../middlewares/authenticate';
+import { authorize } from '../middlewares/authorize';
 import { Router } from 'express';
+import { AuthService } from '../../services/AuthService';
 
-export const orderRouter = ( orderController : OrderController) => {
+export const orderRouter = ( orderController : OrderController, authService : AuthService) => {
   const router = Router();
 
   /**
@@ -26,7 +29,9 @@ export const orderRouter = ( orderController : OrderController) => {
    *          description: Invalid data passed
   */
   router.route('/').post(
-    validate(createOrderSchema), orderController.create
+    validate(createOrderSchema),
+    authorize(authService, ['USER']),
+    orderController.create
   );
 
   /**
@@ -56,7 +61,9 @@ export const orderRouter = ( orderController : OrderController) => {
    *          description: Invalid data passed
   */
   router.route('/:shortId/assign').post(
-    validate(assignOrderSchema), orderController.assign
+    validate(assignOrderSchema),
+    authorize(authService, ['ADMIN']),
+    orderController.assign
   );
 
   /**
@@ -79,7 +86,10 @@ export const orderRouter = ( orderController : OrderController) => {
    *       400:
    *          description: Invalid data passed
   */
-  router.route('/:shortId').get( orderController.query );
+  router.route('/:shortId').get(
+    authenticate(authService),
+    orderController.query,
+  );
 
   return router;
 }

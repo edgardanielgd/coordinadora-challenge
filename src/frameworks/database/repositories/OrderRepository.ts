@@ -47,6 +47,7 @@ export class OrderRepository implements IOrderRepository {
       }
 
       public async findById( id : number ) : Promise<Order | null> {
+
         const query = (
             `
                 SELECT
@@ -85,7 +86,7 @@ export class OrderRepository implements IOrderRepository {
             `
         )
 
-        const [result] = await this.pool.execute(query, [
+        await this.pool.execute(query, [
             order.getSenderId(), order.getReceiverId(), order.getProductCategory(), order.getWeightGrams(),
             order.getTargetAddress(), order.getProductDescription(), order.getDimensionX(), order.getDimensionY(), order.getDimensionZ(),
             order.getQuantity(), order.getStatus(), order.getSourceCityId(), order.getTargetCityId(),
@@ -98,6 +99,14 @@ export class OrderRepository implements IOrderRepository {
     }
 
     public async findByShortId( shortId : string ) : Promise<Order | null> {
+
+        const cachedKey = `order:${shortId}`;
+
+        const cached = await this.redis.get( cachedKey );
+        if (cached) {
+            return <Order>JSON.parse( cached );
+        }
+
         const query = (
             `
                 SELECT
@@ -117,6 +126,14 @@ export class OrderRepository implements IOrderRepository {
         const orders = rows.map( OrderRepository.mapOrderColumns );
 
         if ( orders.length == 0 ) return null;
+
+        const resolvedOrder = orders[0];
+
+        if ( !cached ) {
+            await this.redis.set(
+                cachedKey, JSON.stringify(resolvedOrder), 'EX', 3600
+            );
+        }
 
         return orders[0];
     }

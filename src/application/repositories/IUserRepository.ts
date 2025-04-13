@@ -9,6 +9,7 @@ export interface IUserRepository {
         username : string, email : string
     ) : Promise<boolean>;
 
+    findById( id : number ) : Promise<User | null>
     findByDocument( document : string, documentType : string ) : Promise<User | null>;
     findByUsernameOrEmail( usernameOrEmail : string ) : Promise<User | null>;
     findByUsername( username : string ) : Promise<User | null>;

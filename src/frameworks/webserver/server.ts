@@ -6,6 +6,7 @@ import { useRouter } from './routes';
 import { AuthController } from "../../interfaces/controllers/authController";
 import { UserController } from "../../interfaces/controllers/userController";
 import { OrderController } from "../../interfaces/controllers/orderController";
+import { AuthService } from "../services/AuthService";
 
 interface ServerConfig {
   port: number,
@@ -13,7 +14,8 @@ interface ServerConfig {
   env : string,
   authController : AuthController,
   userController : UserController,
-  orderController : OrderController
+  orderController : OrderController,
+  authService : AuthService,
 }
 
 export default class Server {
@@ -52,7 +54,8 @@ export default class Server {
       this.app,
       this.config.authController,
       this.config.userController,
-      this.config.orderController
+      this.config.orderController,
+      this.config.authService
     );
   }
 
