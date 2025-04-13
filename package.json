@@ -24,10 +24,27 @@
   },
   "homepage": "https://github.com/edgardanielgd/coordinadora-challenge#readme",
   "dependencies": {
+    "@faker-js/faker": "^9.6.0",
+    "@types/faker": "^6.6.8",
+    "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/morgan": "^1.9.9",
+    "@types/supertest": "^6.0.3",
+    "bcrypt-ts": "^6.0.0",
     "cors": "^2.8.5",
+    "db-migrate": "^0.11.14",
+    "db-migrate-mysql": "^3.0.0",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "faker": "^5.5.3",
+    "joi-to-typescript": "^4.15.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "supertest": "^7.1.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "ts-jest": "^29.3.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

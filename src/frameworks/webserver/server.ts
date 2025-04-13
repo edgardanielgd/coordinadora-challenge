@@ -1,9 +1,17 @@
 import express, { Application } from "express";
 import cors, { CorsOptions } from "cors";
+import morgan from "morgan";
+
+import { useRouter } from './routes';
+import { AuthController } from "../../interfaces/controllers/authController";
+import { UserController } from "../../interfaces/controllers/userController";
 
 interface ServerConfig {
   port: number,
-  ip: string
+  ip: string,
+  env : string,
+  authController : AuthController,
+  userController : UserController,
 }
 
 export default class Server {
@@ -17,7 +25,6 @@ export default class Server {
   ) {
     this.app = app;
     this.config = config;
-    this.configServer();
   }
 
   public start() : void {
@@ -29,7 +36,7 @@ export default class Server {
     )
   }
 
-  private configServer(): void {
+  public configServer(): void {
     const corsOptions: CorsOptions = {
       origin: "*"
     };
@@ -37,6 +44,13 @@ export default class Server {
     this.app.use(cors(corsOptions));
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(morgan( this.config.env ));
+
+    useRouter(
+      this.app,
+      this.config.authController,
+      this.config.userController,
+    );
   }
 
 }

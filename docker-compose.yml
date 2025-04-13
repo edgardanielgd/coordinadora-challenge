@@ -1,41 +1,62 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    depends_on:
-      - mysql
-      - redis
-    environment:
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=my-secret-pw
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-
   mysql:
     image: mysql:8.0
     restart: always
+    container_name: shippings-db
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
-      MYSQL_DATABASE: app_db
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3306:3306"
+      - ${DB_PORT}:3306
+    networks:
+      - app-network
     volumes:
       - mysql_data:/var/lib/mysql
 
   redis:
     image: redis:7
     restart: always
+    container_name: shippings-redis
+    env_file:
+      - .env
     ports:
-      - "6379:6379"
+      - ${REDIS_PORT}:6379
+    networks:
+      - app-network
     volumes:
       - redis_data:/data
+
+  app:
+    container_name: shippings-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - ${APP_PORT}:3000
+    networks:
+      - app-network
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   mysql_data:
