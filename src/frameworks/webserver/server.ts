@@ -25,14 +25,14 @@ export default class Server {
 
   constructor(
     app: Application,
-    config : ServerConfig
+    config : ServerConfig,
   ) {
     this.app = app;
     this.config = config;
   }
 
   public start() : void {
-    this.app.listen(
+    const server = this.app.listen(
       this.config.port, this.config.ip,
       () => {
         console.log(`Server running on http://${this.config.ip}:${this.config.port}`)

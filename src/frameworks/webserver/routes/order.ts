@@ -68,7 +68,7 @@ export const orderRouter = ( orderController : OrderController, authService : Au
 
   /**
    * @openapi
-   * /order/{shortId}:
+   * /order/search/{shortId}:
    *   get:
    *     summary: Get shipment order state
    *     tags:
@@ -86,9 +86,80 @@ export const orderRouter = ( orderController : OrderController, authService : Au
    *       400:
    *          description: Invalid data passed
   */
-  router.route('/:shortId').get(
+  router.route('/search/:shortId').get(
     authenticate(authService),
     orderController.query,
+  );
+
+  /**
+   * @openapi
+   * /order/statistics:
+   *   get:
+   *     summary: Get shipment order statistics
+   *     tags:
+   *       - Order
+   *     parameters:
+   *       - in: query
+   *         name: minOrderAssignedDate
+   *         required: false
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Min Order Assigned Date
+   *       - in: query
+   *         name: maxOrderAssignedDate
+   *         required: false
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Max Order Assigned Date
+   *       - in: query
+   *         name: status
+   *         required: false
+   *         schema:
+   *           type: string
+   *         description: Status to Filter
+   *       - in: query
+   *         name: groupBy
+   *         required: false
+   *         schema:
+   *           type: string
+   *         description: Field to group by
+   *       - in: query
+   *         name: limit
+   *         required: false
+   *         schema:
+   *           type: integer
+   *         description: Pagination max size
+   *       - in: query
+   *         name: page
+   *         required: false
+   *         schema:
+   *           type: integer
+   *         description: Pagination current page
+   *       - in: query
+   *         name: transporterId
+   *         required: false
+   *         schema:
+   *           type: integer
+   *         description: Transporter ID to filter
+   *     responses:
+   *       200:
+   *         description: Statistics generated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *                oneOf:
+   *                  - $ref: '#/components/schemas/StatisticsOrder'
+   *                  - $ref: '#/components/schemas/StatisticsOrderByTransporter'
+   *                  - $ref: '#/components/schemas/StatisticsOrderByCity'
+   *
+   *       400:
+   *         description: Invalid data passed
+   */
+  router.route('/statistics').get(
+    authorize(authService, ['ADMIN']),
+    orderController.statistics,
   );
 
   return router;
