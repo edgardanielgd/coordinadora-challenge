@@ -37,7 +37,7 @@ export class AssignShipmentOrderUseCase implements IAssignShipmentOrderUseCase {
     const order = await this.orderRepository.findByShortId( assignOrderDTO.orderShortId );
 
     if ( !order ) {
-      throw new Error('Order not found exception');
+      throw new Error('Order not found');
     }
 
     // Check source and target cities are included in route

@@ -1,15 +1,19 @@
 import { Pool } from 'mysql2/promise';
 import { IOrderRepository } from "../../../application/repositories/IOrderRepository";
 import { Order } from "../../../domain/entities/Order";
+import Redis from 'ioredis';
 
 export class OrderRepository implements IOrderRepository {
 
     pool : Pool
+    redis : Redis
 
     constructor(
-        pool : Pool
+        pool : Pool,
+        redis : Redis
     ) {
         this.pool = pool;
+        this.redis = redis;
     }
 
     private static mapOrderColumns(row: any): Order {
