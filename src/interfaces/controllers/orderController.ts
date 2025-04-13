@@ -3,6 +3,7 @@ import { ICreateShipmentOrderUseCase } from '../../application/use_cases/orders/
 import { AssignOrderDTO, CreateOrderDTO } from '../../application/dto/order';
 import { IAssignShipmentOrderUseCase } from '../../application/use_cases/orders/IAssignShipmentOrderUseCase';
 import { IGetShipmentOrderStateUseCase } from '../../application/use_cases/orders/IGetShipmentOrderStateUseCase';
+import { IQueryStatisticsUseCase } from '../../application/use_cases/orders/IQueryStatisticsUseCase';
 import { AuthPayload } from '../../application/services/IAuthService';
 
 export class OrderController {
@@ -10,15 +11,18 @@ export class OrderController {
   private createShipmentOrderUseCase : ICreateShipmentOrderUseCase;
   private assignShipmentOrderUseCase : IAssignShipmentOrderUseCase;
   private getShipmentStateOrderUseCase : IGetShipmentOrderStateUseCase;
+  private queryStatisticsUseCase : IQueryStatisticsUseCase
 
   constructor(
     createShipmentOrderUseCase : ICreateShipmentOrderUseCase,
     assignShipmentOrderUseCase : IAssignShipmentOrderUseCase,
     getShipmentStateOrderUseCase : IGetShipmentOrderStateUseCase,
+    queryStatisticsUseCase : IQueryStatisticsUseCase,
   ) {
     this.createShipmentOrderUseCase = createShipmentOrderUseCase;
     this.assignShipmentOrderUseCase = assignShipmentOrderUseCase;
     this.getShipmentStateOrderUseCase = getShipmentStateOrderUseCase;
+    this.queryStatisticsUseCase = queryStatisticsUseCase;
   }
 
   public create = async (req : Request, res : Response, next : NextFunction) : Promise<any> => {
@@ -43,10 +47,7 @@ export class OrderController {
 
         const orderCreateResponse = await this.createShipmentOrderUseCase.execute( createUserDTO );
 
-        return res.status(201).json({
-          message: "Successfully created shipment order with the following info",
-          orderCreateResponse
-        });
+        return res.status(201).json(orderCreateResponse);
       }
       catch ( error ) {
 
@@ -66,10 +67,7 @@ export class OrderController {
 
       const assignCaseResponse = await this.assignShipmentOrderUseCase.execute( assignOrderDTO );
 
-      return res.status(200).json({
-        message: "Successfully assigned shipment order to route and transporter",
-        assignCaseResponse
-      });
+      return res.status(200).json(assignCaseResponse);
     }
     catch ( error ) {
 
@@ -79,14 +77,38 @@ export class OrderController {
 
   public query = async (req : Request, res : Response, next : NextFunction) : Promise<any> => {
     try {
+      const authData : AuthPayload = res.locals.user;
       const shortId = req.params.shortId;
 
-      const getShipmentOrderResponse = await this.getShipmentStateOrderUseCase.execute( shortId );
+      const getShipmentOrderResponse = await this.getShipmentStateOrderUseCase.execute( shortId, authData );
 
-      return res.status(201).json({
-        message: "Successfully queried shipment order",
-        getShipmentOrderResponse
-      });
+      return res.status(201).json(getShipmentOrderResponse);
+    }
+    catch ( error ) {
+
+      next(error)
+    }
+  }
+
+  public statistics = async (req : Request, res : Response, next : NextFunction) : Promise<any> => {
+    try {
+      const minDateRaw = req.query.minOrderAssignedDate?.toString();
+      const minDate = minDateRaw && !isNaN(Date.parse(minDateRaw)) ? new Date(minDateRaw) : undefined;
+
+      const maxDateRaw = req.query.maxOrderAssignedDate?.toString();
+      const maxDate = maxDateRaw && !isNaN(Date.parse(maxDateRaw)) ? new Date(maxDateRaw) : undefined;
+
+      const status = req.query.status?.toString();
+      const groupby = req.query.groupBy?.toString();
+      const limit = parseInt( req.query.limit?.toString() || '' );
+      const page = parseInt( req.query.page?.toString() || '' );
+      const transporterId =  parseInt( req.query.transporterId?.toString() || '' );
+
+      const getShipmentOrderResponse = await this.queryStatisticsUseCase.execute(
+        groupby, limit, page, minDate, maxDate, status, transporterId
+      );
+
+      return res.status(200).json(getShipmentOrderResponse);
     }
     catch ( error ) {
 

@@ -43,7 +43,6 @@ const execute = async () => {
     routeSeeder.generate();
     await routeSeeder.insert();
 
-    console.log("4")
     const orderSeeder = new OrderSeeder(
         pool, 10000, citiesSeeder, userSeeder, routeSeeder,
         transporterSeeder, vehicleSeeder

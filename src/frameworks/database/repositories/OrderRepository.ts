@@ -1,22 +1,25 @@
 import { Pool } from 'mysql2/promise';
 import { IOrderRepository } from "../../../application/repositories/IOrderRepository";
 import { Order } from "../../../domain/entities/Order";
-import Redis from 'ioredis';
+import { StatisticsOrderDTO, StatisticsOrderByCityDTO, StatisticsOrderByTransporterDTO } from '../../../application/dto/statistics';
+import { TransporterRepository } from './TransporterRepository';
+import { CityRepository } from './CityRepository';
+import { ICacheService } from '../../../application/services/ICacheService';
 
 export class OrderRepository implements IOrderRepository {
 
     pool : Pool
-    redis : Redis
+    cacheService : ICacheService;
 
     constructor(
         pool : Pool,
-        redis : Redis
+        cacheService : ICacheService
     ) {
         this.pool = pool;
-        this.redis = redis;
+        this.cacheService = cacheService;
     }
 
-    private static mapOrderColumns(row: any): Order {
+    public static mapOrderColumns(row: any): Order {
         return new Order(
           row.ord_id,
           row.ord_sender_id,
@@ -44,9 +47,9 @@ export class OrderRepository implements IOrderRepository {
           row.ord_short_id,
           row.ord_vehicle_id
         );
-      }
+    }
 
-      public async findById( id : number ) : Promise<Order | null> {
+    public async findById( id : number ) : Promise<Order | null> {
 
         const query = (
             `
@@ -94,6 +97,10 @@ export class OrderRepository implements IOrderRepository {
             order.getId(),
           ]);
 
+        const cachedKey = `order:${order.getShortId()}`;
+
+        await this.cacheService.set( cachedKey, order );
+
         return this.findById( order.getId() );
 
     }
@@ -101,11 +108,8 @@ export class OrderRepository implements IOrderRepository {
     public async findByShortId( shortId : string ) : Promise<Order | null> {
 
         const cachedKey = `order:${shortId}`;
-
-        const cached = await this.redis.get( cachedKey );
-        if (cached) {
-            return <Order>JSON.parse( cached );
-        }
+        const cached = await this.cacheService.get<Order>( cachedKey );
+        if (cached) { return cached; }
 
         const query = (
             `
@@ -130,9 +134,7 @@ export class OrderRepository implements IOrderRepository {
         const resolvedOrder = orders[0];
 
         if ( !cached ) {
-            await this.redis.set(
-                cachedKey, JSON.stringify(resolvedOrder), 'EX', 3600
-            );
+            await this.cacheService.set( cachedKey, resolvedOrder );
         }
 
         return orders[0];
@@ -181,6 +183,224 @@ export class OrderRepository implements IOrderRepository {
         const insertId = (result as any).insertId;
 
         return this.findById( insertId );
+    }
+
+    private generateMetricsFilterClause(
+        minShipmentDate? : Date,
+        maxShipmentDate? : Date,
+        shipmentStatus? : string,
+        transporterId?: number
+    ) : string {
+        let whereClause = `TRUE \n`;
+
+        if ( minShipmentDate ) {
+            whereClause = `${whereClause} AND \`order\`.ord_assigned_date >= '${minShipmentDate.toISOString()}'`;
+        }
+
+        if ( maxShipmentDate ) {
+            whereClause = `${whereClause} AND \`order\`.ord_assigned_date <= '${maxShipmentDate.toISOString()}'`;
+        }
+
+        if ( shipmentStatus ) {
+            whereClause = `${whereClause} AND \`order\`.ord_status = '${shipmentStatus}'`;
+        }
+
+        if ( transporterId ) {
+            whereClause = `${whereClause} AND transporter.tra_id = ${transporterId}`;
+        }
+
+        return whereClause;
+    }
+
+    public async getGeneralOrdersMetrics(
+        minShipmentDate? : Date,
+        maxShipmentDate? : Date,
+        shipmentStatus? : string,
+        transporterId?: number
+    ) : Promise<StatisticsOrderDTO> {
+
+        const key = await this.cacheService.getKey(
+            'statistics-general',
+            { minShipmentDate, maxShipmentDate, shipmentStatus, transporterId }
+        );
+
+        const redisResult = await this.cacheService.get<StatisticsOrderDTO>( key );
+
+        if (redisResult) { return redisResult; }
+
+        const whereClause = this.generateMetricsFilterClause(
+            minShipmentDate, maxShipmentDate,
+            shipmentStatus, transporterId
+        );
+
+        const query = (
+            `
+                SELECT
+                    COUNT(*) AS count,
+                    MIN(TIMESTAMPDIFF(DAY, ord_assigned_date, COALESCE(ord_actual_reach_date, CURRENT_TIMESTAMP))) AS minTime,
+                    MAX(TIMESTAMPDIFF(DAY, ord_assigned_date, COALESCE(ord_actual_reach_date, CURRENT_TIMESTAMP))) AS maxTime,
+                    AVG(TIMESTAMPDIFF(DAY, ord_assigned_date, COALESCE(ord_actual_reach_date, CURRENT_TIMESTAMP))) AS meanTime
+                FROM \`order\`
+
+                INNER JOIN transporter ON \`order\`.ord_transporter_id = transporter.tra_id
+                INNER JOIN vehicle ON \`order\`.ord_vehicle_id = vehicle.veh_id
+
+                WHERE ord_assigned_date IS NOT NULL
+                AND
+                    ${whereClause}
+            `
+        )
+
+        const [rows] = await this.pool.query<any[]>(query);
+
+        const { count, minTime, maxTime, meanTime } = rows[0];
+
+        const sqlResult = <StatisticsOrderDTO>{
+            minTime, maxTime, meanTime, count
+        }
+
+        if ( ! redisResult ) await this.cacheService.set( key, sqlResult );
+
+        return sqlResult;
+    }
+
+    public async getGeneralOrdersMetricsByTransporter(
+        limit : number, page : number,
+        minShipmentDate? : Date,
+        maxShipmentDate? : Date,
+        shipmentStatus? : string,
+        transporterId?: number
+    ) : Promise<StatisticsOrderByTransporterDTO[]> {
+
+        const key = await this.cacheService.getKey(
+            'statistics-transporter',
+            { limit, page, minShipmentDate, maxShipmentDate, shipmentStatus, transporterId }
+        );
+
+        const redisResult = await this.cacheService.get<StatisticsOrderByTransporterDTO[]>( key );
+
+        if (redisResult) { return redisResult; }
+
+        const whereClause = this.generateMetricsFilterClause(
+            minShipmentDate, maxShipmentDate,
+            shipmentStatus, transporterId
+        );
+
+        const query = (
+            `
+                SELECT
+                    transporter.tra_id, transporter.usr_id, transporter.tra_status,
+                    COUNT(*) AS count,
+                    MIN(TIMESTAMPDIFF(DAY, ord_assigned_date, COALESCE(ord_actual_reach_date, CURRENT_TIMESTAMP))) AS minTime,
+                    MAX(TIMESTAMPDIFF(DAY, ord_assigned_date, COALESCE(ord_actual_reach_date, CURRENT_TIMESTAMP))) AS maxTime,
+                    AVG(TIMESTAMPDIFF(DAY, ord_assigned_date, COALESCE(ord_actual_reach_date, CURRENT_TIMESTAMP))) AS meanTime
+                FROM \`order\`
+
+                INNER JOIN transporter ON \`order\`.ord_transporter_id = transporter.tra_id
+
+                WHERE ord_assigned_date IS NOT NULL
+                AND
+                    ${whereClause}
+
+                GROUP BY
+                    transporter.tra_id, transporter.usr_id, transporter.tra_status
+                ORDER BY transporter.tra_id ASC
+                LIMIT ${limit} OFFSET ${(page) * limit}
+            `
+        )
+
+        const [rows] = await this.pool.query<any[]>(query);
+
+        const sqlResult : StatisticsOrderByTransporterDTO[] = rows.map(
+            row => {
+                const transporter = TransporterRepository.mapTransporterColumns( row );
+
+                const { count, minTime, maxTime, meanTime } = row;
+                const statistics = <StatisticsOrderDTO>{
+                    count : parseFloat( count ), minTime : parseFloat( minTime ),
+                    maxTime : parseFloat( maxTime ), meanTime : parseFloat( meanTime )
+                }
+
+                return <StatisticsOrderByTransporterDTO>{
+                    transporter,
+                    statistics
+                }
+            }
+        )
+
+        if ( ! redisResult ) await this.cacheService.set( key, sqlResult );
+
+        return sqlResult;
+    }
+
+    public async getGeneralOrdersMetricsByCity(
+        limit : number, page : number,
+        minShipmentDate? : Date,
+        maxShipmentDate? : Date,
+        shipmentStatus? : string,
+        transporterId?: number
+    ) : Promise<StatisticsOrderByCityDTO[]> {
+
+        const key = await this.cacheService.getKey(
+            'statistics-city',
+            { limit, page, minShipmentDate, maxShipmentDate, shipmentStatus, transporterId }
+        );
+
+        const redisResult = await this.cacheService.get<StatisticsOrderByCityDTO[]>( key );
+
+        if (redisResult) { return redisResult; }
+
+        const whereClause = this.generateMetricsFilterClause(
+            minShipmentDate, maxShipmentDate,
+            shipmentStatus, transporterId
+        );
+
+        const query = (
+            `
+                SELECT
+                    city.cit_id, city.cit_name,
+                    COUNT(*) AS count,
+                    MIN(TIMESTAMPDIFF(DAY, ord_assigned_date, COALESCE(ord_actual_reach_date, CURRENT_TIMESTAMP))) AS minTime,
+                    MAX(TIMESTAMPDIFF(DAY, ord_assigned_date, COALESCE(ord_actual_reach_date, CURRENT_TIMESTAMP))) AS maxTime,
+                    AVG(TIMESTAMPDIFF(DAY, ord_assigned_date, COALESCE(ord_actual_reach_date, CURRENT_TIMESTAMP))) AS meanTime
+                FROM \`order\`
+
+                INNER JOIN city ON \`order\`.ord_target_city_id = city.cit_id
+
+                WHERE ord_assigned_date IS NOT NULL
+                AND
+                    ${whereClause}
+
+                GROUP BY
+                    city.cit_id, city.cit_name
+
+                ORDER BY city.cit_id ASC
+                LIMIT ${limit} OFFSET ${(page) * limit}
+            `
+        )
+
+        const [rows] = await this.pool.query<any[]>(query);
+
+        const sqlResult : StatisticsOrderByCityDTO[] = rows.map(
+            row => {
+                const city = CityRepository.mapCityColumns( row );
+
+                const { count, minTime, maxTime, meanTime } = row;
+                const statistics = <StatisticsOrderDTO>{
+                    count : parseFloat( count ), minTime : parseFloat( minTime ),
+                    maxTime : parseFloat( maxTime ), meanTime : parseFloat( meanTime )
+                }
+
+                return <StatisticsOrderByCityDTO>{
+                    city,
+                    statistics
+                }
+            }
+        )
+
+        if ( ! redisResult ) await this.cacheService.set( key, sqlResult );
+
+        return sqlResult;
     }
 
 }
