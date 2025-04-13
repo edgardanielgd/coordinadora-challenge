@@ -16,6 +16,8 @@ export interface Config {
   smtpPort : number,
   smtpUsername : string,
   smtpPassword : string,
+  redisHost: string,
+  redisPort: number,
 }
 
 export const config : Config = {
@@ -34,4 +36,6 @@ export const config : Config = {
   smtpPort : process.env.SMTP_MAIL_PORT ? parseInt( process.env.SMTP_MAIL_PORT ) : 587,
   smtpUsername : process.env.SMTP_MAIL_USERNAME || '',
   smtpPassword : process.env.SMTP_MAIL_PASSWORD || '',
+  redisHost : process.env.REDIS_HOST || '',
+  redisPort : process.env.REDIS_PORT ? parseInt( process.env.REDIS_PORT ) : 6379,
 }

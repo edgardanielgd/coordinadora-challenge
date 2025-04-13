@@ -4,7 +4,7 @@ import { Order } from "../../domain/entities/Order";
  * @openapi
  * components:
  *   schemas:
- *     CreateOrderDto:
+ *     CreateOrder:
  *       type: object
  *       required:
  *         - senderId
@@ -80,7 +80,7 @@ export interface CreateOrderDTO {
  * @openapi
  * components:
  *   schemas:
- *     CreateOrderResponseDto:
+ *     CreateOrderResponse:
  *       type: object
  *       required:
  *         - order
@@ -97,7 +97,7 @@ export interface CreateOrderResponseDTO {
  * @openapi
  * components:
  *   schemas:
- *     AssignOrderDTO:
+ *     AssignOrder:
  *       type: object
  *       required:
  *         - orderShortId
@@ -140,7 +140,7 @@ export interface AssignOrderDTO {
  * @openapi
  * components:
  *   schemas:
- *     AssignOrderResponseDto:
+ *     AssignOrderResponse:
  *       type: object
  *       required:
  *         - order
@@ -150,5 +150,22 @@ export interface AssignOrderDTO {
  *       description: DTO for the response of assigning an order to a transporter. Contains the created order.
  */
 export interface AssignOrderResponseDTO {
+    order: Order;
+}
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     QueryOrderResponse:
+ *       type: object
+ *       required:
+ *         - order
+ *       properties:
+ *         order:
+ *           $ref: '#/components/schemas/Order'
+ *       description: DTO for the response of querying an order by short ID.
+ */
+export interface QueryOrderResponseDTO {
     order: Order;
 }

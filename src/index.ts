@@ -5,6 +5,7 @@ import Server from './frameworks/webserver/server';
 
 // Repositories
 import { getPool } from './frameworks/database/mysql/pool';
+import { getRedis } from './frameworks/database/redis/connection';
 import { UserRepository } from './frameworks/database/repositories/UserRepository';
 import { OrderRepository } from './frameworks/database/repositories/OrderRepository';
 
@@ -23,6 +24,12 @@ import { GeocodeService } from './frameworks/services/GeocodeService';
 import { CreateShipmentOrderUseCase } from './application/use_cases/orders/CreateShipmentOrderUseCase';
 import { ShortIdService } from './frameworks/services/ShortIdService';
 import { OrderController } from './interfaces/controllers/orderController';
+import { TransporterRepository } from './frameworks/database/repositories/TransporterRepository';
+import { RouteRepository } from './frameworks/database/repositories/RouteRepository';
+import { CityRepository } from './frameworks/database/repositories/CityRepository';
+import { VehicleRepository } from './frameworks/database/repositories/VehicleRepository';
+import { AssignShipmentOrderUseCase } from './application/use_cases/orders/AssignShipmentOrderUseCase';
+import { GetShipmentOrderStateUseCase } from './application/use_cases/orders/GetShipmentOrderStateUseCase';
 
 const pool = getPool({
     dbHost: config.dbHost,
@@ -32,8 +39,17 @@ const pool = getPool({
     dbDatabase: config.dbDatabase,
 })
 
+const redis = getRedis({
+    host: config.redisHost,
+    port: config.redisPort
+})
+
 const userRepository = new UserRepository( pool );
-const orderRepository = new OrderRepository( pool );
+const orderRepository = new OrderRepository( pool, redis );
+const transporterRepository = new TransporterRepository( pool );
+const routeRepository = new RouteRepository( pool );
+const cityRepository = new CityRepository( pool );
+const vehicleRepository = new VehicleRepository( pool );
 
 const authService = new AuthService({ jwtSecret: config.jwtSecret });
 const mailService = new MailService({
@@ -54,10 +70,20 @@ const loginUseCase = new LoginUseCase(userRepository, authService);
 const createOrderUseCase = new CreateShipmentOrderUseCase(
     orderRepository, geocodeService, mailService, shortIdService
 );
+const assignShipmentOrderUseCase = new AssignShipmentOrderUseCase(
+    orderRepository,transporterRepository, routeRepository,
+    vehicleRepository, cityRepository, mailService
+);
+const getShipmentStateOrderUseCase = new GetShipmentOrderStateUseCase(
+    orderRepository
+);
+
 
 const authController = new AuthController(loginUseCase);
 const userController = new UserController(registerUserUseCase);
-const orderController = new OrderController(createOrderUseCase);
+const orderController = new OrderController(
+    createOrderUseCase, assignShipmentOrderUseCase, getShipmentStateOrderUseCase
+);
 
 const app = express();
 const server = new Server( app , {
