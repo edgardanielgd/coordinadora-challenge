@@ -1,0 +1,6 @@
+CREATE TABLE transporter (
+    tra_id INT AUTO_INCREMENT PRIMARY KEY,
+    usr_id INT NOT NULL,
+    tra_status VARCHAR(20) NOT NULL,
+    FOREIGN KEY (usr_id) REFERENCES user(usr_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;

@@ -1,0 +1,5 @@
+CREATE TABLE vehicle (
+    veh_id INT AUTO_INCREMENT PRIMARY KEY,
+    veh_name VARCHAR(255) NOT NULL,
+    veh_capacity DECIMAL(18, 6) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;

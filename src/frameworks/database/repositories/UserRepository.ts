@@ -1,9 +1,9 @@
-import { Privilege } from "../../../../domain/entities/Privilege";
-import { User } from "../../../../domain/entities/User";
-import { IUserRepository } from "../../../../application/repositories/IUserRepository";
+import { Privilege } from "../../../domain/entities/Privilege";
+import { User } from "../../../domain/entities/User";
+import { IUserRepository } from "../../../application/repositories/IUserRepository";
 import { Pool } from 'mysql2/promise';
 
-export class UserRepositoryImpl implements IUserRepository {
+export class UserRepository implements IUserRepository {
 
     pool : Pool
 
@@ -31,6 +31,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
     private static mapPrivColumns ( row : any ) : Privilege {
         return new Privilege(
+            row.prv_id,
             row.usr_id,
             row.prv_role,
           );
@@ -51,7 +52,7 @@ export class UserRepositoryImpl implements IUserRepository {
         )
 
         const [rows] = await this.pool.query<any[]>(query, [ id ] );
-        const users = rows.map( UserRepositoryImpl.mapUserColumns );
+        const users = rows.map( UserRepository.mapUserColumns );
 
         if ( users.length == 0 ) return null;
 
@@ -79,7 +80,7 @@ export class UserRepositoryImpl implements IUserRepository {
         const [rows] = await this.pool.query<any[]>(query, [
             document, documentType, username, email
          ] );
-        const users = rows.map( UserRepositoryImpl.mapUserColumns );
+        const users = rows.map( UserRepository.mapUserColumns );
 
         if ( users.length > 0 ) return true;
 
@@ -101,7 +102,7 @@ export class UserRepositoryImpl implements IUserRepository {
         )
 
         const [rows] = await this.pool.query<any[]>(query, [ document, documentType ] );
-        const users = rows.map( UserRepositoryImpl.mapUserColumns );
+        const users = rows.map( UserRepository.mapUserColumns );
 
         if ( users.length == 0 ) return null;
 
@@ -123,7 +124,7 @@ export class UserRepositoryImpl implements IUserRepository {
         )
 
         const [rows] = await this.pool.query<any[]>(query, [ usernameOrEmail, usernameOrEmail ] );
-        const users = rows.map( UserRepositoryImpl.mapUserColumns );
+        const users = rows.map( UserRepository.mapUserColumns );
 
         if ( users.length == 0 ) return null;
 
@@ -145,7 +146,7 @@ export class UserRepositoryImpl implements IUserRepository {
         )
 
         const [rows] = await this.pool.query<any[]>(query, [ username ] );
-        const users = rows.map( UserRepositoryImpl.mapUserColumns );
+        const users = rows.map( UserRepository.mapUserColumns );
 
         if ( users.length == 0 ) return null;
 
@@ -167,7 +168,7 @@ export class UserRepositoryImpl implements IUserRepository {
         )
 
         const [rows] = await this.pool.query<any[]>(query, [ email ] );
-        const users = rows.map( UserRepositoryImpl.mapUserColumns );
+        const users = rows.map( UserRepository.mapUserColumns );
 
         if ( users.length == 0 ) return null;
 
@@ -187,7 +188,7 @@ export class UserRepositoryImpl implements IUserRepository {
         )
 
         const [rows] = await this.pool.query<any[]>(query, [ user.getId() ] );
-        const privileges = rows.map( UserRepositoryImpl.mapPrivColumns );
+        const privileges = rows.map( UserRepository.mapPrivColumns );
 
         return privileges;
     }

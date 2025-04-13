@@ -1,5 +1,4 @@
 import { User } from "../../domain/entities/User";
-import { LoginDTO, LoginResponseDTO } from "../dto/auth";
 
 export type AuthPayload = {
 

@@ -5,6 +5,7 @@ import morgan from "morgan";
 import { useRouter } from './routes';
 import { AuthController } from "../../interfaces/controllers/authController";
 import { UserController } from "../../interfaces/controllers/userController";
+import { OrderController } from "../../interfaces/controllers/orderController";
 
 interface ServerConfig {
   port: number,
@@ -12,6 +13,7 @@ interface ServerConfig {
   env : string,
   authController : AuthController,
   userController : UserController,
+  orderController : OrderController
 }
 
 export default class Server {
@@ -50,6 +52,7 @@ export default class Server {
       this.app,
       this.config.authController,
       this.config.userController,
+      this.config.orderController
     );
   }
 

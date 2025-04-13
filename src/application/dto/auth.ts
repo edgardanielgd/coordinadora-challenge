@@ -1,5 +1,4 @@
-import { User } from "../../domain/entities/User";
-
+import { User } from '../../domain/entities/User';
 /**
  * @openapi
  * components:
