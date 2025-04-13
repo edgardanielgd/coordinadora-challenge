@@ -1,1 +1,1 @@
-/* Replace with your SQL commands */
+DROP TABLE city_route;

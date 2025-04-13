@@ -17,8 +17,12 @@ interface GeoapifyResult {
     rank? : GeoapifyResultRank,
 }
 
+interface GeoapifyProperties {
+    properties : GeoapifyResult;
+}
+
 interface GeoapifyResponse {
-    results?: GeoapifyResult[];
+    features?: GeoapifyProperties[];
 }
 
 export interface GeoapifyGeocodeConfig {
@@ -45,29 +49,32 @@ export class GeocodeService implements IGeocodeService {
 
         const response = await fetch( `${this.config.apiUrl}?${params}` );
 
+        console.log(`${this.config.apiUrl}?${params}`)
+
         if ( !response ) return null;
 
         const responseAsJSON = <GeoapifyResponse>(await response.json());
-        const results = responseAsJSON.results?.filter(
-            (result) => result.rank?.popularity && result.rank?.popularity >= this.config.minConfidenceLevel
+        const results = responseAsJSON.features?.filter(
+            (result) => result.properties?.rank?.confidence && result.properties?.rank?.confidence >= this.config.minConfidenceLevel
         ).sort(
             (ranking_1, ranking_2) => (
-                ranking_1.rank?.popularity && ranking_2.rank?.popularity &&
-                ranking_1.rank?.popularity >= ranking_2.rank?.popularity
+                ranking_1.properties?.rank?.confidence && ranking_2.properties?.rank?.confidence &&
+                ranking_1.properties?.rank?.confidence >= ranking_2.properties?.rank?.confidence
             ) ? 1 : -1
         ) || [];
+
+        console.log("pasa por aqui",responseAsJSON)
 
         if ( results.length == 0 ) return null;
 
         const bestResult = results[0];
 
         return <GeocodeResult>{
-            latitude : bestResult.lat,
-            longitude : bestResult.lon,
-            solvedAddress : bestResult.formatted,
-            solvedCity : bestResult.city,
+            latitude : bestResult.properties?.lat,
+            longitude : bestResult.properties?.lon,
+            solvedAddress : bestResult.properties?.formatted,
+            solvedCity : bestResult.properties?.city,
         }
-
     }
 
 }

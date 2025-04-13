@@ -30,13 +30,13 @@ export class MailService implements IMailService {
 
     public async mailTo(
         subject : string,
-        content : string,
+        html : string,
         to : string
     ) : Promise<boolean> {
 
         const mailOptions = {
             from: `"Shippings Mailer" <${this.config.user}>`,
-            to, subject, content
+            to, subject, html
         };
 
         const result = await this.transport.sendMail( mailOptions );

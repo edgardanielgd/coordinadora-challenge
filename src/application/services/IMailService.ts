@@ -2,7 +2,7 @@ export interface IMailService {
 
     mailTo(
         subject : string,
-        content : string,
+        html : string,
         to : string
     ) : Promise<boolean>;
 

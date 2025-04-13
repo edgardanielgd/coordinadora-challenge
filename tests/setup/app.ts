@@ -4,7 +4,7 @@ import Server from './../../src/frameworks/webserver/server';
 
 // Repositories
 import { getPool } from './../../src/frameworks/database/mysql/pool';
-import { UserRepositoryImpl } from '../../src/frameworks/database/mysql/repositories/UserRepository';
+import { UserRepository } from '../../src/frameworks/database/mysql/repositories/UserRepository';
 
 // Services
 import { AuthService } from '../../src/frameworks/services/AuthService';

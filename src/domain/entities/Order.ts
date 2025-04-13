@@ -95,10 +95,10 @@ export class Order {
     private routeId: number | null;
     private sourceCityId: number;
     private targetCityId: number;
-    private latitude: number;
-    private longitude: number;
-    private solvedAddress: string;
-    private solvedCity: string;
+    private latitude: number | null;
+    private longitude: number | null;
+    private solvedAddress: string | null;
+    private solvedCity: string | null;
     private assignedDate: Date | null;
     private expectedReachDate: Date | null;
     private actualReachDate: Date | null;
@@ -223,19 +223,19 @@ export class Order {
         return this.targetCityId;
     }
 
-    public getLatitude(): number {
+    public getLatitude(): number | null {
         return this.latitude;
     }
 
-    public getLongitude(): number {
+    public getLongitude(): number | null {
         return this.longitude;
     }
 
-    public getSolvedAddress(): string {
+    public getSolvedAddress(): string | null {
         return this.solvedAddress;
     }
 
-    public getSolvedCity(): string {
+    public getSolvedCity(): string | null {
         return this.solvedCity;
     }
 
