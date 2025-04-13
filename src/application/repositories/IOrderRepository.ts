@@ -4,11 +4,15 @@ export interface IOrderRepository {
 
     findByShortId( shortId : string ) : Promise<Order | null>;
 
+    update(
+        order : Order
+    ) : Promise<Order | null>;
+
     save(
         senderId: number,
         receiverId: number,
         productCategory: string,
-        weightGrams: string,
+        weightGrams: number,
         targetAddress: string,
         productDescription: string,
         dimensionX: number,
@@ -24,6 +28,6 @@ export interface IOrderRepository {
         solvedCity: string,
         shortId: string,
 
-    ) : Promise<Order | null>,
+    ) : Promise<Order | null>;
 
 }
