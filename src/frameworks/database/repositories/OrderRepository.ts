@@ -1,9 +1,6 @@
-import { Privilege } from "../../../../domain/entities/Privilege";
-import { User } from "../../../../domain/entities/User";
-import { IUserRepository } from "../../../../application/repositories/IUserRepository";
 import { Pool } from 'mysql2/promise';
-import { IOrderRepository } from "../../../../application/repositories/IOrderRepository";
-import { Order } from "../../../../domain/entities/Order";
+import { IOrderRepository } from "../../../application/repositories/IOrderRepository";
+import { Order } from "../../../domain/entities/Order";
 
 export class OrderRepository implements IOrderRepository {
 
@@ -69,6 +66,33 @@ export class OrderRepository implements IOrderRepository {
         return orders[0];
     }
 
+    public async update(
+        order: Order
+    ) : Promise<Order | null> {
+
+        const query = (
+            `
+                UPDATE \`order\` SET
+                    ord_sender_id = ?, ord_receiver_id = ?, ord_product_category = ?, ord_weight_grams = ?,
+                    ord_target_address = ?, ord_product_description = ?, ord_dimension_x = ?, ord_dimension_y = ?, ord_dimension_z = ?,
+                    ord_quantity = ?, ord_status = ?, ord_source_city_id = ?, ord_target_city_id = ?,
+                    ord_latitude = ?, ord_longitude = ?, ord_solved_address = ?, ord_solved_city = ?, ord_short_id = ?
+                WHERE ord_id = ?;
+            `
+        )
+
+        const [result] = await this.pool.execute(query, [
+            order.getSenderId(), order.getReceiverId(), order.getProductCategory(), order.getWeightGrams(),
+            order.getTargetAddress(), order.getProductDescription(), order.getDimensionX(), order.getDimensionY(), order.getDimensionZ(),
+            order.getQuantity(), order.getStatus(), order.getSourceCityId(), order.getTargetCityId(),
+            order.getLatitude(), order.getLongitude(), order.getSolvedAddress(), order.getSolvedCity(), order.getShortId(),
+            order.getId(),
+          ]);
+
+        return this.findById( order.getId() );
+
+    }
+
     public async findByShortId( shortId : string ) : Promise<Order | null> {
         const query = (
             `
@@ -97,7 +121,7 @@ export class OrderRepository implements IOrderRepository {
         senderId: number,
         receiverId: number,
         productCategory: string,
-        weightGrams: string,
+        weightGrams: number,
         targetAddress: string,
         productDescription: string,
         dimensionX: number,
@@ -112,7 +136,6 @@ export class OrderRepository implements IOrderRepository {
         solvedAddress: string,
         solvedCity: string,
         shortId: string,
-
     ) : Promise<Order | null> {
 
         const query = (

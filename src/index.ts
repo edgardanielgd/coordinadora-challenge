@@ -5,8 +5,8 @@ import Server from './frameworks/webserver/server';
 
 // Repositories
 import { getPool } from './frameworks/database/mysql/pool';
-import { UserRepository } from './frameworks/database/mysql/repositories/UserRepository';
-import { OrderRepository } from './frameworks/database/mysql/repositories/OrderRepository';
+import { UserRepository } from './frameworks/database/repositories/UserRepository';
+import { OrderRepository } from './frameworks/database/repositories/OrderRepository';
 
 // Services
 import { AuthService } from './frameworks/services/AuthService';

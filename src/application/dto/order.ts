@@ -65,7 +65,7 @@ export interface CreateOrderDTO {
     senderId: number;
     receiverId: number;
     productCategory: string;
-    weightGrams: string;
+    weightGrams: number;
     targetAddress: string;
     productDescription: string;
     dimensionX: number;
@@ -90,5 +90,65 @@ export interface CreateOrderDTO {
  *       description: DTO for the response of creating an order. Contains the created order.
  */
 export interface CreateOrderResponseDTO {
+    order: Order;
+}
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     AssignOrderDTO:
+ *       type: object
+ *       required:
+ *         - orderShortId
+ *         - transporterId
+ *         - routeId
+ *         - expectedReachData
+ *         - vehicleId
+ *       properties:
+ *         orderShortId:
+ *           type: string
+ *           description: A short identifier for the order.
+ *         transporterId:
+ *           type: integer
+ *           format: int64
+ *           description: ID of the transporter assigned to the order.
+ *         routeId:
+ *           type: integer
+ *           format: int64
+ *           description: ID of the route the order will follow.
+ *         expectedReachData:
+ *           type: string
+ *           format: date-time
+ *           description: Expected date and time the order should reach its destination.
+ *         vehicleId:
+ *           type: integer
+ *           format: int64
+ *           description: ID of the vehicle assigned for the order.
+ *       description: DTO for updating an existing order with transport, route, and vehicle info.
+ */
+
+export interface AssignOrderDTO {
+    orderShortId: string;
+    transporterId: number;
+    routeId: number;
+    expectedReachData: Date;
+    vehicleId: number;
+}
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     AssignOrderResponseDto:
+ *       type: object
+ *       required:
+ *         - order
+ *       properties:
+ *         order:
+ *           $ref: '#/components/schemas/Order'
+ *       description: DTO for the response of assigning an order to a transporter. Contains the created order.
+ */
+export interface AssignOrderResponseDTO {
     order: Order;
 }

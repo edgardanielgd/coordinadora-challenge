@@ -32,7 +32,7 @@
 *         productCategory:
 *           type: string
 *         weightGrams:
-*           type: string
+*           type: number
 *         targetAddress:
 *           type: string
 *         productDescription:
@@ -79,183 +79,82 @@
 *       description: An order model that includes logistics, location, and transportation data
 */
 export class Order {
-    private id: number;
-    private senderId: number;
-    private receiverId: number;
-    private productCategory: string;
-    private weightGrams: string;
-    private targetAddress: string;
-    private productDescription: string;
-    private dimensionX: number;
-    private dimensionY: number;
-    private dimensionZ: number;
-    private quantity: number;
-    private status: string;
-    private transporterId: number | null;
-    private routeId: number | null;
-    private sourceCityId: number;
-    private targetCityId: number;
-    private latitude: number | null;
-    private longitude: number | null;
-    private solvedAddress: string | null;
-    private solvedCity: string | null;
-    private assignedDate: Date | null;
-    private expectedReachDate: Date | null;
-    private actualReachDate: Date | null;
-    private shortId: string;
-    private vehicleId: number | null;
-
     constructor(
-        id: number,
-        senderId: number,
-        receiverId: number,
-        productCategory: string,
-        weightGrams: string,
-        targetAddress: string,
-        productDescription: string,
-        dimensionX: number,
-        dimensionY: number,
-        dimensionZ: number,
-        quantity: number,
-        status: string,
-        transporterId: number | null,
-        routeId: number | null,
-        sourceCityId: number,
-        targetCityId: number,
-        latitude: number,
-        longitude: number,
-        solvedAddress: string,
-        solvedCity: string,
-        assignedDate: Date | null,
-        expectedReachDate: Date | null,
-        actualReachDate: Date | null,
-        shortId: string,
-        vehicleId: number | null
-    ) {
-        this.id = id;
-        this.senderId = senderId;
-        this.receiverId = receiverId;
-        this.productCategory = productCategory;
-        this.weightGrams = weightGrams;
-        this.targetAddress = targetAddress;
-        this.productDescription = productDescription;
-        this.dimensionX = dimensionX;
-        this.dimensionY = dimensionY;
-        this.dimensionZ = dimensionZ;
-        this.quantity = quantity;
-        this.status = status;
-        this.transporterId = transporterId;
-        this.routeId = routeId;
-        this.sourceCityId = sourceCityId;
-        this.targetCityId = targetCityId;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.solvedAddress = solvedAddress;
-        this.solvedCity = solvedCity;
-        this.assignedDate = assignedDate;
-        this.expectedReachDate = expectedReachDate;
-        this.actualReachDate = actualReachDate;
-        this.shortId = shortId;
-        this.vehicleId = vehicleId;
-    }
+      private id: number,
+      private senderId: number,
+      private receiverId: number,
+      private productCategory: string,
+      private weightGrams: number,
+      private targetAddress: string,
+      private productDescription: string,
+      private dimensionX: number,
+      private dimensionY: number,
+      private dimensionZ: number,
+      private quantity: number,
+      private status: string,
+      private transporterId: number | null,
+      private routeId: number | null,
+      private sourceCityId: number,
+      private targetCityId: number,
+      private latitude: number | null,
+      private longitude: number | null,
+      private solvedAddress: string | null,
+      private solvedCity: string | null,
+      private assignedDate: Date | null,
+      private expectedReachDate: Date | null,
+      private actualReachDate: Date | null,
+      private shortId: string,
+      private vehicleId: number | null
+    ) {}
 
-    public getId(): number {
-        return this.id;
-    }
+    public getId() { return this.id; }
+    public getSenderId() { return this.senderId; }
+    public getReceiverId() { return this.receiverId; }
+    public getProductCategory() { return this.productCategory; }
+    public getWeightGrams() { return this.weightGrams; }
+    public getTargetAddress() { return this.targetAddress; }
+    public getProductDescription() { return this.productDescription; }
+    public getDimensionX() { return this.dimensionX; }
+    public getDimensionY() { return this.dimensionY; }
+    public getDimensionZ() { return this.dimensionZ; }
+    public getQuantity() { return this.quantity; }
+    public getStatus() { return this.status; }
+    public getTransporterId() { return this.transporterId; }
+    public getRouteId() { return this.routeId; }
+    public getSourceCityId() { return this.sourceCityId; }
+    public getTargetCityId() { return this.targetCityId; }
+    public getLatitude() { return this.latitude; }
+    public getLongitude() { return this.longitude; }
+    public getSolvedAddress() { return this.solvedAddress; }
+    public getSolvedCity() { return this.solvedCity; }
+    public getAssignedDate() { return this.assignedDate; }
+    public getExpectedReachDate() { return this.expectedReachDate; }
+    public getActualReachDate() { return this.actualReachDate; }
+    public getShortId() { return this.shortId; }
+    public getVehicleId() { return this.vehicleId; }
 
-    public getSenderId(): number {
-        return this.senderId;
-    }
-
-    public getReceiverId(): number {
-        return this.receiverId;
-    }
-
-    public getProductCategory(): string {
-        return this.productCategory;
-    }
-
-    public getWeightGrams(): string {
-        return this.weightGrams;
-    }
-
-    public getTargetAddress(): string {
-        return this.targetAddress;
-    }
-
-    public getProductDescription(): string {
-        return this.productDescription;
-    }
-
-    public getDimensionX(): number {
-        return this.dimensionX;
-    }
-
-    public getDimensionY(): number {
-        return this.dimensionY;
-    }
-
-    public getDimensionZ(): number {
-        return this.dimensionZ;
-    }
-
-    public getQuantity(): number {
-        return this.quantity;
-    }
-
-    public getStatus(): string {
-        return this.status;
-    }
-
-    public getTransporterId(): number | null {
-        return this.transporterId;
-    }
-
-    public getRouteId(): number | null {
-        return this.routeId;
-    }
-
-    public getSourceCityId(): number {
-        return this.sourceCityId;
-    }
-
-    public getTargetCityId(): number {
-        return this.targetCityId;
-    }
-
-    public getLatitude(): number | null {
-        return this.latitude;
-    }
-
-    public getLongitude(): number | null {
-        return this.longitude;
-    }
-
-    public getSolvedAddress(): string | null {
-        return this.solvedAddress;
-    }
-
-    public getSolvedCity(): string | null {
-        return this.solvedCity;
-    }
-
-    public getAssignedDate(): Date | null {
-        return this.assignedDate;
-    }
-
-    public getExpectedReachDate(): Date | null {
-        return this.expectedReachDate;
-    }
-
-    public getActualReachDate(): Date | null {
-        return this.actualReachDate;
-    }
-
-    public getShortId(): string {
-        return this.shortId;
-    }
-
-    public getVehicleId(): number | null {
-        return this.vehicleId;
-    }
-}
+    public setSenderId(val: number) { this.senderId = val; }
+    public setReceiverId(val: number) { this.receiverId = val; }
+    public setProductCategory(val: string) { this.productCategory = val; }
+    public setWeightGrams(val: number) { this.weightGrams = val; }
+    public setTargetAddress(val: string) { this.targetAddress = val; }
+    public setProductDescription(val: string) { this.productDescription = val; }
+    public setDimensionX(val: number) { this.dimensionX = val; }
+    public setDimensionY(val: number) { this.dimensionY = val; }
+    public setDimensionZ(val: number) { this.dimensionZ = val; }
+    public setQuantity(val: number) { this.quantity = val; }
+    public setStatus(val: string) { this.status = val; }
+    public setTransporterId(val: number | null) { this.transporterId = val; }
+    public setRouteId(val: number | null) { this.routeId = val; }
+    public setSourceCityId(val: number) { this.sourceCityId = val; }
+    public setTargetCityId(val: number) { this.targetCityId = val; }
+    public setLatitude(val: number | null) { this.latitude = val; }
+    public setLongitude(val: number | null) { this.longitude = val; }
+    public setSolvedAddress(val: string | null) { this.solvedAddress = val; }
+    public setSolvedCity(val: string | null) { this.solvedCity = val; }
+    public setAssignedDate(val: Date | null) { this.assignedDate = val; }
+    public setExpectedReachDate(val: Date | null) { this.expectedReachDate = val; }
+    public setActualReachDate(val: Date | null) { this.actualReachDate = val; }
+    public setShortId(val: string) { this.shortId = val; }
+    public setVehicleId(val: number | null) { this.vehicleId = val; }
+  }

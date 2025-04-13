@@ -4,7 +4,6 @@ import { IGeocodeService } from "../../services/IGeocodeService";
 import { IMailService } from "../../services/IMailService";
 import { IShortIdService } from "../../services/IShortIdService";
 import { CreateOrderDTO, CreateOrderResponseDTO } from "../../dto/order";
-import { privateEncrypt } from "crypto";
 
 export class CreateShipmentOrderUseCase implements ICreateShipmentOrderUseCase {
 

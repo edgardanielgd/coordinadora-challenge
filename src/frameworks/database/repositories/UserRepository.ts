@@ -1,6 +1,6 @@
-import { Privilege } from "../../../../domain/entities/Privilege";
-import { User } from "../../../../domain/entities/User";
-import { IUserRepository } from "../../../../application/repositories/IUserRepository";
+import { Privilege } from "../../../domain/entities/Privilege";
+import { User } from "../../../domain/entities/User";
+import { IUserRepository } from "../../../application/repositories/IUserRepository";
 import { Pool } from 'mysql2/promise';
 
 export class UserRepository implements IUserRepository {
