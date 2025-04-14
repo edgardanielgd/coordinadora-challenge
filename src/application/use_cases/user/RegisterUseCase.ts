@@ -25,7 +25,9 @@ export class RegisterUserUseCase implements IRegisterUseCase {
     )
 
     if ( existentUser ) {
-        throw new UserAlreadyExitsError();
+        throw new UserAlreadyExitsError(
+          'There is an user with the same username, document or email'
+        );
     }
 
     const hashedPassword = this.authService.hash( createUserDto.password );

@@ -5,6 +5,8 @@ import morgan from "morgan";
 import { useRouter } from './routes';
 import { AuthController } from "../../interfaces/controllers/authController";
 import { UserController } from "../../interfaces/controllers/userController";
+import { OrderController } from "../../interfaces/controllers/orderController";
+import { AuthService } from "../services/AuthService";
 
 interface ServerConfig {
   port: number,
@@ -12,6 +14,8 @@ interface ServerConfig {
   env : string,
   authController : AuthController,
   userController : UserController,
+  orderController : OrderController,
+  authService : AuthService,
 }
 
 export default class Server {
@@ -21,14 +25,14 @@ export default class Server {
 
   constructor(
     app: Application,
-    config : ServerConfig
+    config : ServerConfig,
   ) {
     this.app = app;
     this.config = config;
   }
 
   public start() : void {
-    this.app.listen(
+    const server = this.app.listen(
       this.config.port, this.config.ip,
       () => {
         console.log(`Server running on http://${this.config.ip}:${this.config.port}`)
@@ -50,6 +54,8 @@ export default class Server {
       this.app,
       this.config.authController,
       this.config.userController,
+      this.config.orderController,
+      this.config.authService
     );
   }
 

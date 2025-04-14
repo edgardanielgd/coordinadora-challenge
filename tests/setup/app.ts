@@ -4,7 +4,7 @@ import Server from './../../src/frameworks/webserver/server';
 
 // Repositories
 import { getPool } from './../../src/frameworks/database/mysql/pool';
-import { UserRepositoryImpl } from '../../src/frameworks/database/mysql/repositories/UserRepository';
+import { UserRepository } from '../../src/frameworks/database/repositories/UserRepository';
 
 // Services
 import { AuthService } from '../../src/frameworks/services/AuthService';
@@ -17,21 +17,24 @@ import { LoginUseCase } from '../../src/application/use_cases/auth/LoginUseCase'
 import { AuthController } from './../../src/interfaces/controllers/authController';
 import { UserController } from './../../src/interfaces/controllers/userController';
 import { ILoginUseCase } from '../../src/application/use_cases/auth/ILoginUseCase';
+import { OrderController } from '../../src/interfaces/controllers/orderController';
 
 export const createTestApp = (
   {
-    authController,
-    userController
+    authController, userController,
+    orderController, authService
   }: {
     authController: AuthController;
     userController: UserController;
+    orderController: OrderController;
+    authService: AuthService;
   }
 ) => {
 
     const app = express();
     const server = new Server( app , {
         ip: config.ip, port: config.port, env : config.env,
-        authController, userController
+        authController, userController, orderController, authService
     });
 
     server.configServer()

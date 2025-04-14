@@ -29,12 +29,9 @@ export class UserController {
           roles : req.body.roles,
         };
 
-        const loginResponse = await this.registerUserUseCase.execute( createUserDTO );
+        const registerResponse = await this.registerUserUseCase.execute( createUserDTO );
 
-        return res.status(201).json({
-          message: "Successfully created user",
-          loginResponse
-        });
+        return res.status(201).json(registerResponse);
       }
       catch ( error ) {
         if (error instanceof UserAlreadyExitsError) {
