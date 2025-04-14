@@ -65,18 +65,18 @@ const mailService = new MailService({
 const geocodeService = new GeocodeService({
     apiUrl : config.geocodingApiUrl,
     apiKey : config.geocodingApiKey,
-    minConfidenceLevel : 0.5
+    minConfidenceLevel : 0.4
 });
 const shortIdService = new ShortIdService();
 
 const registerUserUseCase = new RegisterUserUseCase(userRepository, authService);
 const loginUseCase = new LoginUseCase(userRepository, authService);
 const createOrderUseCase = new CreateShipmentOrderUseCase(
-    orderRepository, geocodeService, mailService, shortIdService
+    orderRepository, geocodeService, mailService, shortIdService, userRepository
 );
 const assignShipmentOrderUseCase = new AssignShipmentOrderUseCase(
     orderRepository,transporterRepository, routeRepository,
-    vehicleRepository, cityRepository, mailService
+    vehicleRepository, cityRepository, userRepository, mailService
 );
 const getShipmentStateOrderUseCase = new GetShipmentOrderStateUseCase(
     orderRepository
@@ -101,7 +101,7 @@ const server = new Server( app , {
 server.configServer();
 server.start();
 
-const closeConnection = () => { pool.end(); }
+const closeConnection = () => { pool.end(); redis.quit() }
 
 process.on('SIGINT', closeConnection);
 process.on('SIGTERM', closeConnection);

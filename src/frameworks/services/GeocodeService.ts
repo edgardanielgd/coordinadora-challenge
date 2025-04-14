@@ -1,4 +1,3 @@
-import { urlencoded } from "express";
 import { GeocodeResult, IGeocodeService } from "../../application/services/IGeocodeService";
 
 interface GeoapifyResultRank {
@@ -48,8 +47,6 @@ export class GeocodeService implements IGeocodeService {
         }).toString();
 
         const response = await fetch( `${this.config.apiUrl}?${params}` );
-
-        console.log(`${this.config.apiUrl}?${params}`)
 
         if ( !response ) return null;
 

@@ -30,6 +30,7 @@ export const orderRouter = ( orderController : OrderController, authService : Au
   */
   router.route('/').post(
     validate(createOrderSchema),
+    authenticate(authService),
     authorize(authService, ['USER']),
     orderController.create
   );

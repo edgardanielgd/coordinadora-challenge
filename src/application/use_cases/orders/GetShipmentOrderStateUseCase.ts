@@ -2,6 +2,7 @@ import { IOrderRepository } from "../../repositories/IOrderRepository";
 import { QueryOrderResponseDTO } from "../../dto/order";
 import { IGetShipmentOrderStateUseCase } from "./IGetShipmentOrderStateUseCase";
 import { AuthPayload } from "../../services/IAuthService";
+import { OrderNotFoundError } from "../../errors/orderErrors";
 
 export class GetShipmentOrderStateUseCase implements IGetShipmentOrderStateUseCase {
 
@@ -18,7 +19,7 @@ export class GetShipmentOrderStateUseCase implements IGetShipmentOrderStateUseCa
     const order = await this.orderRepository.findByShortId( orderShortId );
 
     if ( !order ) {
-      throw new Error('Order not found');
+      throw new OrderNotFoundError('Order not found');
     }
 
     // Check user should see order
@@ -27,7 +28,7 @@ export class GetShipmentOrderStateUseCase implements IGetShipmentOrderStateUseCa
       (executorData.user.getId() == order.getReceiverId());
 
     if ( !canSeeOrder ) {
-      throw new Error('Order not found');
+      throw new OrderNotFoundError('Order not found');
     }
 
     return <QueryOrderResponseDTO>{ order };

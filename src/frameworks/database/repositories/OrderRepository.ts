@@ -19,34 +19,43 @@ export class OrderRepository implements IOrderRepository {
         this.cacheService = cacheService;
     }
 
+    private static mapCachedOrderColumns(raw: any) : Order {
+        const {
+            id, senderId, receiverId, productCategory, weightGrams,
+            targetAddress, productDescription, dimensionX, dimensionY, dimensionZ,
+            quantity, status, transporterId, routeId, sourceCityId, targetCityId,
+            latitude, longitude, solvedAddress, solvedCity, shortId, vehicleId,
+            assignedDate, expectedReachDate, actualReachDate
+          } = raw;
+
+          const order = new Order(
+            id, senderId, receiverId, productCategory, weightGrams,
+            targetAddress, productDescription, dimensionX, dimensionY, dimensionZ,
+            quantity, status, transporterId, routeId, sourceCityId, targetCityId,
+            latitude, longitude, solvedAddress, solvedCity,
+            assignedDate ? new Date(assignedDate) : null,
+            expectedReachDate ? new Date(expectedReachDate) : null,
+            actualReachDate ? new Date(actualReachDate) : null,
+            shortId, vehicleId
+          );
+
+        return order;
+    }
+
     public static mapOrderColumns(row: any): Order {
-        return new Order(
-          row.ord_id,
-          row.ord_sender_id,
-          row.ord_receiver_id,
-          row.ord_product_category,
-          row.ord_weight_grams,
-          row.ord_target_address,
-          row.ord_product_description,
-          row.ord_dimension_x,
-          row.ord_dimension_y,
-          row.ord_dimension_z,
-          row.ord_quantity,
-          row.ord_status,
-          row.ord_transporter_id,
-          row.ord_route_id,
-          row.ord_source_city_id,
-          row.ord_target_city_id,
-          row.ord_latitude,
-          row.ord_longitude,
-          row.ord_solved_address,
-          row.ord_solved_city,
-          row.ord_assigned_date ? new Date(row.ord_assigned_date) : null,
-          row.ord_expected_reach_date ? new Date(row.ord_expected_reach_date) : null,
-          row.ord_actual_reach_date ? new Date(row.ord_actual_reach_date) : null,
-          row.ord_short_id,
-          row.ord_vehicle_id
-        );
+        const r = row;
+        const order = new Order(
+            r.ord_id, r.ord_sender_id, r.ord_receiver_id, r.ord_product_category, r.ord_weight_grams,
+            r.ord_target_address, r.ord_product_description, r.ord_dimension_x, r.ord_dimension_y, r.ord_dimension_z,
+            r.ord_quantity, r.ord_status, r.ord_transporter_id, r.ord_route_id, r.ord_source_city_id, r.ord_target_city_id,
+            r.ord_latitude, r.ord_longitude, r.ord_solved_address, r.ord_solved_city,
+            r.ord_assigned_date ? new Date(r.ord_assigned_date) : null,
+            r.ord_expected_reach_date ? new Date(r.ord_expected_reach_date) : null,
+            r.ord_actual_reach_date ? new Date(r.ord_actual_reach_date) : null,
+            r.ord_short_id, r.ord_vehicle_id
+          );
+
+        return order;
     }
 
     public async findById( id : number ) : Promise<Order | null> {
@@ -108,8 +117,12 @@ export class OrderRepository implements IOrderRepository {
     public async findByShortId( shortId : string ) : Promise<Order | null> {
 
         const cachedKey = `order:${shortId}`;
-        const cached = await this.cacheService.get<Order>( cachedKey );
-        if (cached) { return cached; }
+        const cachedData = await this.cacheService.get( cachedKey );
+
+        if (cachedData) {
+            const cachedOrder = OrderRepository.mapCachedOrderColumns( cachedData )
+            return cachedOrder;
+         }
 
         const query = (
             `
@@ -133,7 +146,7 @@ export class OrderRepository implements IOrderRepository {
 
         const resolvedOrder = orders[0];
 
-        if ( !cached ) {
+        if ( !cachedData ) {
             await this.cacheService.set( cachedKey, resolvedOrder );
         }
 

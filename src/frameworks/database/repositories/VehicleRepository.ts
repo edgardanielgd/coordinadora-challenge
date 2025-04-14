@@ -27,16 +27,16 @@ export class VehicleRepository implements IVehicleRepository {
                     veh_id, veh_name, veh_capacity
                 FROM \`vehicle\`
                 WHERE
-                    tra_id = ?
+                    veh_id = ?
             `
         )
 
         const [rows] = await this.pool.query<any[]>(query, [ id ] );
-        const cities = rows.map( VehicleRepository.mapVehicleColumns );
+        const vehicles = rows.map( VehicleRepository.mapVehicleColumns );
 
-        if ( cities.length == 0 ) return null;
+        if ( vehicles.length == 0 ) return null;
 
-        return cities[0];
+        return vehicles[0];
     }
 
     public async getVehicleReservedCapacity(id: number): Promise<number | null> {
@@ -52,7 +52,7 @@ export class VehicleRepository implements IVehicleRepository {
                     B.ord_vehicle_id = A.veh_id
 
                 WHERE
-                    A.veh_id = ? AND A.ord_status = 'EN TRANSPORTE'
+                    A.veh_id = ? AND B.ord_status = 'EN TRANSPORTE'
             `
         )
 

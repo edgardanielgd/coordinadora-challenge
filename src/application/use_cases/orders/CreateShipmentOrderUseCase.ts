@@ -4,6 +4,10 @@ import { IGeocodeService } from "../../services/IGeocodeService";
 import { IMailService } from "../../services/IMailService";
 import { IShortIdService } from "../../services/IShortIdService";
 import { CreateOrderDTO, CreateOrderResponseDTO } from "../../dto/order";
+import { IUserRepository } from "../../repositories/IUserRepository";
+import { OrderBadLocation, OrderSenderMatchesReceiver, UnableToProcessOrder } from "../../errors/orderErrors";
+import { UserNotFoundError } from "../../errors/userErrors";
+import { UnableToSendMail } from "../../errors/servicesErrors";
 
 export class CreateShipmentOrderUseCase implements ICreateShipmentOrderUseCase {
 
@@ -11,17 +15,20 @@ export class CreateShipmentOrderUseCase implements ICreateShipmentOrderUseCase {
   private geocodeService : IGeocodeService;
   private mailService : IMailService;
   private shortIdService : IShortIdService;
+  private userRepository: IUserRepository;
 
   constructor (
     orderRepository : IOrderRepository,
     geocodeService : IGeocodeService,
     mailService : IMailService,
     shortIdService : IShortIdService,
+    userRepository: IUserRepository,
   ) {
     this.orderRepository = orderRepository;
     this.geocodeService = geocodeService;
     this.mailService = mailService;
     this.shortIdService = shortIdService;
+    this.userRepository = userRepository;
   }
 
   public async execute( createOrderDto : CreateOrderDTO ) : Promise<CreateOrderResponseDTO> {
@@ -34,7 +41,7 @@ export class CreateShipmentOrderUseCase implements ICreateShipmentOrderUseCase {
     const geocodeResult = await this.geocodeService.checkAddress( createOrderDto.targetAddress );
 
     if ( !geocodeResult ) {
-      throw new Error("Unable to check target address");
+      throw new OrderBadLocation();
     }
 
     const order = await this.orderRepository.save(
@@ -46,12 +53,28 @@ export class CreateShipmentOrderUseCase implements ICreateShipmentOrderUseCase {
       geocodeResult.solvedCity, shortId
     );
 
+    if ( !order ) {
+      throw new UnableToProcessOrder('Unable to process order to create');
+    }
+
+    const user = await this.userRepository.findById( order.getSenderId() );
+
+    if ( !user ) {
+      throw new UserNotFoundError("Couldn\'t retrieve sender user");
+    }
+
+    if ( order.getSenderId() == order.getReceiverId() ) {
+      throw new OrderSenderMatchesReceiver('Sender is the same receiver');
+    }
+
     const emailStatus = await this.mailService.mailTo(
-      'test', '<p1>This is an email to prove its worth it</p1>', 'edgardanielgd123@gmail.com'
+      `Shipment Order Created`,
+      `<p1>Order with Id <b>${order.getShortId()}</b></p1> is created. State: <b>${order.getStatus()}</b>`,
+      `${user.getEmail()}`
     );
 
     if ( !emailStatus ) {
-      throw new Error("Unable to send order data to user");
+      throw new UnableToSendMail("Unable to send order data to user");
     }
 
     return <CreateOrderResponseDTO>{ order }
