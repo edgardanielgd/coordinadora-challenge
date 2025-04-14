@@ -1,6 +1,7 @@
 import swaggerJSDoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
-import { Express } from 'express';
+import path from 'path';
+
+const isProd = process.env.NODE_ENV === 'production';
 
 const options: swaggerJSDoc.Options = {
   definition: {
@@ -21,7 +22,11 @@ const options: swaggerJSDoc.Options = {
     },
     security: [{ bearerAuth: [] }],
   },
-  apis: ['./src/**/*.ts'], // adjust path to match your structure
+  apis: [
+    isProd
+    ? path.join(__dirname, '/**/*.js') // In Docker, look in dist/
+    : './src/**/*.ts'
+  ]
 };
 
 export const swaggerSpec = swaggerJSDoc(options);
