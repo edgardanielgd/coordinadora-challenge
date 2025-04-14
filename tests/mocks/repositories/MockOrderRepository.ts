@@ -18,7 +18,6 @@ export class MockOrderRepository implements IOrderRepository {
 
   public async update(order: Order): Promise<Order | null> {
     if (this.orders.has(order.getId())) {
-      console.log('tiene')
       this.orders.set(order.getId(), order);
       return order;
     }

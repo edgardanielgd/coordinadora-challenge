@@ -59,8 +59,6 @@ describe(
         }
       )
 
-      console.log(response.order.getTransporterId())
-
       expect(response.order.getTransporterId()).toBe(1);
       expect(response.order.getRouteId()).toBe(1);
       expect(response.order.getVehicleId()).toBe(1);

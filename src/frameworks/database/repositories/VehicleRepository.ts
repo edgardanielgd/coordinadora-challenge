@@ -58,8 +58,6 @@ export class VehicleRepository implements IVehicleRepository {
 
         const [rows] = await this.pool.query<any[]>(query, [ id ] );
 
-        console.log(rows)
-
         if ( rows.length == 0 ) return null;
 
         return rows[0][0];
