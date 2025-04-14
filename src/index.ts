@@ -101,7 +101,7 @@ const server = new Server( app , {
 server.configServer();
 server.start();
 
-const closeConnection = () => { pool.end(); }
+const closeConnection = () => { pool.end(); redis.quit() }
 
 process.on('SIGINT', closeConnection);
 process.on('SIGTERM', closeConnection);
