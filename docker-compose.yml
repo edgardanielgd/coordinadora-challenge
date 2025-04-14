@@ -40,7 +40,7 @@ services:
     env_file:
       - .env
     ports:
-      - ${APP_PORT}:5000
+      - ${APP_PORT}:${APP_PORT}
     networks:
       - app-network
     depends_on:

@@ -21,4 +21,6 @@ EXPOSE 3000
 
 ENV NODE_ENV=production
 
+# 👇 Run migration before app starts
+
 CMD ["node", "dist/src/index.js"]
