@@ -24,7 +24,7 @@ const options: swaggerJSDoc.Options = {
   },
   apis: [
     isProd
-    ? path.join(__dirname, '/**/*.js') // In Docker, look in dist/
+    ? './dist/src/**/*.js'
     : './src/**/*.ts'
   ]
 };
