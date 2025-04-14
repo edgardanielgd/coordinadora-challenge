@@ -1,6 +1,7 @@
 import { IOrderRepository } from "../../repositories/IOrderRepository";
 import { IQueryStatisticsUseCase } from "./IQueryStatisticsUseCase";
 import { StatisticsOrderByCityDTO, StatisticsOrderByTransporterDTO, StatisticsOrderDTO } from "../../dto/statistics";
+import { UnableToProcessOrder } from "../../errors/orderErrors";
 
 export class QueryStatisticsUseCase implements IQueryStatisticsUseCase {
 
@@ -31,7 +32,7 @@ export class QueryStatisticsUseCase implements IQueryStatisticsUseCase {
       );
 
       if ( !generalStatisticsByCity ) {
-        throw new Error('Unable to calculate metrics');
+        throw new UnableToProcessOrder('Unable to calculate metrics');
       }
 
       return generalStatisticsByCity;
@@ -43,7 +44,7 @@ export class QueryStatisticsUseCase implements IQueryStatisticsUseCase {
       );
 
       if ( !generalStatisticsByTransporter ) {
-        throw new Error('Unable to calculate metrics');
+        throw new UnableToProcessOrder('Unable to calculate metrics');
       }
 
       return generalStatisticsByTransporter;
@@ -54,7 +55,7 @@ export class QueryStatisticsUseCase implements IQueryStatisticsUseCase {
     );
 
     if ( !generalStatistics ) {
-      throw new Error('Unable to calculate metrics');
+      throw new UnableToProcessOrder('Unable to calculate metrics');
     }
 
     return generalStatistics;

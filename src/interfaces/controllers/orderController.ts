@@ -5,6 +5,7 @@ import { IAssignShipmentOrderUseCase } from '../../application/use_cases/orders/
 import { IGetShipmentOrderStateUseCase } from '../../application/use_cases/orders/IGetShipmentOrderStateUseCase';
 import { IQueryStatisticsUseCase } from '../../application/use_cases/orders/IQueryStatisticsUseCase';
 import { AuthPayload } from '../../application/services/IAuthService';
+import { InvalidOrder, OrderBadLocation, OrderInvalidCapacity, OrderNotFoundError, OrderSenderMatchesReceiver, UnableToProcessOrder } from '../../application/errors/orderErrors';
 
 export class OrderController {
 
@@ -50,6 +51,29 @@ export class OrderController {
         return res.status(201).json(orderCreateResponse);
       }
       catch ( error ) {
+        if (error instanceof UnableToProcessOrder) {
+          return res.status(500).json({ message : error.message })
+        }
+
+        if (error instanceof InvalidOrder) {
+          return res.status(400).json({ message : error.message })
+        }
+
+        if (error instanceof OrderNotFoundError) {
+          return res.status(500).json({ message : error.message })
+        }
+
+        if (error instanceof OrderSenderMatchesReceiver) {
+          return res.status(409).json({ message : error.message })
+        }
+
+        if (error instanceof OrderBadLocation) {
+          return res.status(400).json({ message : error.message })
+        }
+
+        if (error instanceof OrderInvalidCapacity) {
+          return res.status(400).json({ message : error.message })
+        }
 
         next(error)
       }
@@ -71,6 +95,30 @@ export class OrderController {
     }
     catch ( error ) {
 
+      if (error instanceof UnableToProcessOrder) {
+        return res.status(500).json({ message : error.message })
+      }
+
+      if (error instanceof InvalidOrder) {
+        return res.status(400).json({ message : error.message })
+      }
+
+      if (error instanceof OrderNotFoundError) {
+        return res.status(500).json({ message : error.message })
+      }
+
+      if (error instanceof OrderSenderMatchesReceiver) {
+        return res.status(409).json({ message : error.message })
+      }
+
+      if (error instanceof OrderBadLocation) {
+        return res.status(400).json({ message : error.message })
+      }
+
+      if (error instanceof OrderInvalidCapacity) {
+        return res.status(400).json({ message : error.message })
+      }
+
       next(error)
     }
   }
@@ -85,6 +133,30 @@ export class OrderController {
       return res.status(201).json(getShipmentOrderResponse);
     }
     catch ( error ) {
+
+      if (error instanceof UnableToProcessOrder) {
+        return res.status(500).json({ message : error.message })
+      }
+
+      if (error instanceof InvalidOrder) {
+        return res.status(400).json({ message : error.message })
+      }
+
+      if (error instanceof OrderNotFoundError) {
+        return res.status(500).json({ message : error.message })
+      }
+
+      if (error instanceof OrderSenderMatchesReceiver) {
+        return res.status(409).json({ message : error.message })
+      }
+
+      if (error instanceof OrderBadLocation) {
+        return res.status(400).json({ message : error.message })
+      }
+
+      if (error instanceof OrderInvalidCapacity) {
+        return res.status(400).json({ message : error.message })
+      }
 
       next(error)
     }
@@ -111,6 +183,30 @@ export class OrderController {
       return res.status(200).json(getShipmentOrderResponse);
     }
     catch ( error ) {
+
+      if (error instanceof UnableToProcessOrder) {
+        return res.status(500).json({ message : error.message })
+      }
+
+      if (error instanceof InvalidOrder) {
+        return res.status(400).json({ message : error.message })
+      }
+
+      if (error instanceof OrderNotFoundError) {
+        return res.status(500).json({ message : error.message })
+      }
+
+      if (error instanceof OrderSenderMatchesReceiver) {
+        return res.status(409).json({ message : error.message })
+      }
+
+      if (error instanceof OrderBadLocation) {
+        return res.status(400).json({ message : error.message })
+      }
+
+      if (error instanceof OrderInvalidCapacity) {
+        return res.status(400).json({ message : error.message })
+      }
 
       next(error)
     }

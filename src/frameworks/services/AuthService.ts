@@ -1,4 +1,4 @@
-import { genSaltSync, hashSync, compareSync } from "bcrypt-ts";
+import { genSaltSync, hashSync, compareSync } from "bcryptjs";
 import { verify, sign, JwtPayload } from "jsonwebtoken";
 import { IAuthService, AuthPayload } from "../../application/services/IAuthService";
 import { config } from '../config/config';

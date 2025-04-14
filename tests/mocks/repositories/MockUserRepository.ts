@@ -2,7 +2,7 @@ import { Privilege } from "../../../src/domain/entities/Privilege";
 import { User } from "../../../src/domain/entities/User";
 import { IUserRepository } from "../../../src/application/repositories/IUserRepository";
 
-export class TestUserRepository implements IUserRepository {
+export class MockUserRepository implements IUserRepository {
     private users: User[] = [];
     private privileges: Map<number, Privilege[]> = new Map();
     private currentId = 1;

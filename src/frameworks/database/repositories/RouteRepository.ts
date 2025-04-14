@@ -1,5 +1,4 @@
 import { Pool } from 'mysql2/promise';
-import { ICityRepository } from '../../../application/repositories/ICityRepository';
 import { City } from '../../../domain/entities/City';
 import { IRouteRepository } from '../../../application/repositories/IRouteRepository';
 import { Route } from '../../../domain/entities/Route';
