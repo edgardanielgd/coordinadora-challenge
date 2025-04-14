@@ -63,8 +63,6 @@ export class GeocodeService implements IGeocodeService {
             ) ? 1 : -1
         ) || [];
 
-        console.log("pasa por aqui",responseAsJSON)
-
         if ( results.length == 0 ) return null;
 
         const bestResult = results[0];

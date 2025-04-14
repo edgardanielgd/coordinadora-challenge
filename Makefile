@@ -10,8 +10,14 @@ run-migrations:
 rollback-last-migration:
 	npx db-migrate down --migrations-dir=./src/frameworks/database/mysql/migrations --config=./src/frameworks/config/database.ts
 
+rollback-all:
+	npx db-migrate reset --migrations-dir=./src/frameworks/database/mysql/migrations --config=./src/frameworks/config/database.ts
+
 dev:
 	npm run dev
 
 test:
 	npx jest --verbose
+
+seed:
+	npm run seed

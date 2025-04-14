@@ -13,7 +13,7 @@ export class TransporterRepository implements ITransporterRepository {
         this.pool = pool;
     }
 
-    private static mapTransporterColumns(row: any): Transporter {
+    public static mapTransporterColumns(row: any): Transporter {
         return new Transporter(
           row.tra_id,
           row.usr_id,

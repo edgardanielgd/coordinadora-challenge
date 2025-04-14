@@ -30,6 +30,8 @@ import { CityRepository } from './frameworks/database/repositories/CityRepositor
 import { VehicleRepository } from './frameworks/database/repositories/VehicleRepository';
 import { AssignShipmentOrderUseCase } from './application/use_cases/orders/AssignShipmentOrderUseCase';
 import { GetShipmentOrderStateUseCase } from './application/use_cases/orders/GetShipmentOrderStateUseCase';
+import { QueryStatisticsUseCase } from './application/use_cases/orders/QueryStatisticsUseCase';
+import { CacheService } from './frameworks/services/CacheService';
 
 const pool = getPool({
     dbHost: config.dbHost,
@@ -44,8 +46,10 @@ const redis = getRedis({
     port: config.redisPort
 })
 
+const cacheService = new CacheService( redis );
+
 const userRepository = new UserRepository( pool );
-const orderRepository = new OrderRepository( pool, redis );
+const orderRepository = new OrderRepository( pool, cacheService );
 const transporterRepository = new TransporterRepository( pool );
 const routeRepository = new RouteRepository( pool );
 const cityRepository = new CityRepository( pool );
@@ -77,20 +81,27 @@ const assignShipmentOrderUseCase = new AssignShipmentOrderUseCase(
 const getShipmentStateOrderUseCase = new GetShipmentOrderStateUseCase(
     orderRepository
 );
-
+const queryStatisticsUseCase = new QueryStatisticsUseCase(
+    orderRepository
+);
 
 const authController = new AuthController(loginUseCase);
 const userController = new UserController(registerUserUseCase);
 const orderController = new OrderController(
-    createOrderUseCase, assignShipmentOrderUseCase, getShipmentStateOrderUseCase
+    createOrderUseCase, assignShipmentOrderUseCase,
+    getShipmentStateOrderUseCase, queryStatisticsUseCase
 );
 
 const app = express();
 const server = new Server( app , {
     ip: config.ip, port: config.port, env : config.env,
-    authController, userController, orderController
+    authController, userController, orderController, authService
 });
 
-server.configServer()
-
+server.configServer();
 server.start();
+
+const closeConnection = () => { pool.end(); }
+
+process.on('SIGINT', closeConnection);
+process.on('SIGTERM', closeConnection);

@@ -6,6 +6,7 @@ export class TestUserRepository implements IUserRepository {
     private users: User[] = [];
     private privileges: Map<number, Privilege[]> = new Map();
     private currentId = 1;
+    private currentPrivilegeId = 1;
 
     async findById(id: number): Promise<User | null> {
       return this.users.find(user => user.getId() === id) || null;
@@ -77,7 +78,7 @@ export class TestUserRepository implements IUserRepository {
     }
 
     async addPrivilege(user: User, name: string): Promise<Privilege[]> {
-      const newPrivilege = new Privilege(user.getId(), name);
+      const newPrivilege = new Privilege(this.currentPrivilegeId++, user.getId(), name);
       const current = this.privileges.get(user.getId()) || [];
       current.push(newPrivilege);
       this.privileges.set(user.getId(), current);
