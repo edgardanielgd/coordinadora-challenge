@@ -3,7 +3,7 @@ import Joi from 'joi';
 export const createOrderSchema = Joi.object({
   receiverId: Joi.number().integer().required(),
   productCategory: Joi.string().min(1).max(255).required(),
-  weightGrams: Joi.string().min(1).max(255).required(),
+  weightGrams: Joi.number().min(0).max(1000000).required(),
   targetAddress: Joi.string().min(1).max(500).required(),
   productDescription: Joi.string().min(1).required(),
   dimensionX: Joi.number().required(),
@@ -15,7 +15,6 @@ export const createOrderSchema = Joi.object({
 });
 
 export const assignOrderSchema = Joi.object({
-  orderShortId: Joi.string().required(),
   transporterId: Joi.number().required(),
   routeId: Joi.number().required(),
   expectedReachData: Joi.date().required(),

@@ -6,6 +6,7 @@ import { IRouteRepository } from "../../repositories/IRouteRepository";
 import { IVehicleRepository } from "../../repositories/IVehicleRepository";
 import { ICityRepository } from "../../repositories/ICityRepository";
 import { IAssignShipmentOrderUseCase } from "./IAssignShipmentOrderUseCase";
+import { IUserRepository } from "../../repositories/IUserRepository";
 
 export class AssignShipmentOrderUseCase implements IAssignShipmentOrderUseCase {
 
@@ -14,7 +15,9 @@ export class AssignShipmentOrderUseCase implements IAssignShipmentOrderUseCase {
   private routeRepository : IRouteRepository;
   private vehicleRepository : IVehicleRepository;
   private cityRepository : ICityRepository;
+  private userRepository: IUserRepository;
   private mailService : IMailService;
+
 
   constructor (
     orderRepository : IOrderRepository,
@@ -22,6 +25,7 @@ export class AssignShipmentOrderUseCase implements IAssignShipmentOrderUseCase {
     routeRepository : IRouteRepository,
     vehicleRepository : IVehicleRepository,
     cityRepository : ICityRepository,
+    userRepository: IUserRepository,
     mailService : IMailService,
   ) {
     this.orderRepository = orderRepository;
@@ -29,6 +33,7 @@ export class AssignShipmentOrderUseCase implements IAssignShipmentOrderUseCase {
     this.routeRepository = routeRepository;
     this.vehicleRepository = vehicleRepository;
     this.cityRepository = cityRepository;
+    this.userRepository = userRepository;
     this.mailService = mailService;
   }
 
@@ -58,13 +63,15 @@ export class AssignShipmentOrderUseCase implements IAssignShipmentOrderUseCase {
     }
 
     // Check vehicle has enough capacity to move packet
-    const currentCapacity = await this.vehicleRepository.getVehicleReservedCapacity( assignOrderDTO.vehicleId );
+    const currentCapacity = await this.vehicleRepository.getVehicleReservedCapacity( assignOrderDTO.vehicleId ) || 0;
 
-    if ( ! currentCapacity ) {
-      throw new Error('Couldn\'t get vehicle reserved capacity');
+    const vehicle = await this.vehicleRepository.findById( assignOrderDTO.vehicleId );
+
+    if ( ! vehicle ) {
+      throw new Error('Couldn\'t get vehicle data');
     }
 
-    if ( currentCapacity + order.getWeightGrams() * order.getQuantity() ) {
+    if ( currentCapacity + order.getWeightGrams() * order.getQuantity() > vehicle.getCapacity() ) {
       throw new Error('Can\'t move order due to vehicle capacity inssuficient')
     }
 
@@ -80,8 +87,16 @@ export class AssignShipmentOrderUseCase implements IAssignShipmentOrderUseCase {
       throw new Error('Couldn\'t update order');
     }
 
+    const user = await this.userRepository.findById( order.getSenderId() );
+
+    if ( !user ) {
+      throw new Error("Couldn\'t retrieve sender user");
+    }
+
     const emailStatus = await this.mailService.mailTo(
-      'Shipment changed it\' state', '<p1>Shipment has changed it\'s state to <b>IN TRANSPORT</b></p1>', 'edgardanielgd123@gmail.com'
+      `Shipment Order Assigned`,
+      `<p1>Order with Id <b>${order.getShortId()}</b></p1> has changed it's state to: <b>${order.getStatus()}</b>`,
+      `${user.getEmail()}`
     );
 
     if ( !emailStatus ) {

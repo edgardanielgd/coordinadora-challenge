@@ -23,10 +23,7 @@ export class AuthController {
 
         const loginResponse = await this.loginUseCase.execute( loginDTO );
 
-        return res.status(200).json({
-          message: "Successfully logged in",
-          loginResponse
-        });
+        return res.status(200).json(loginResponse);
       }
       catch ( error ) {
         if (error instanceof UserNotFoundError) {

@@ -4,6 +4,7 @@ import { IGeocodeService } from "../../services/IGeocodeService";
 import { IMailService } from "../../services/IMailService";
 import { IShortIdService } from "../../services/IShortIdService";
 import { CreateOrderDTO, CreateOrderResponseDTO } from "../../dto/order";
+import { IUserRepository } from "../../repositories/IUserRepository";
 
 export class CreateShipmentOrderUseCase implements ICreateShipmentOrderUseCase {
 
@@ -11,17 +12,20 @@ export class CreateShipmentOrderUseCase implements ICreateShipmentOrderUseCase {
   private geocodeService : IGeocodeService;
   private mailService : IMailService;
   private shortIdService : IShortIdService;
+  private userRepository: IUserRepository;
 
   constructor (
     orderRepository : IOrderRepository,
     geocodeService : IGeocodeService,
     mailService : IMailService,
     shortIdService : IShortIdService,
+    userRepository: IUserRepository,
   ) {
     this.orderRepository = orderRepository;
     this.geocodeService = geocodeService;
     this.mailService = mailService;
     this.shortIdService = shortIdService;
+    this.userRepository = userRepository;
   }
 
   public async execute( createOrderDto : CreateOrderDTO ) : Promise<CreateOrderResponseDTO> {
@@ -46,8 +50,20 @@ export class CreateShipmentOrderUseCase implements ICreateShipmentOrderUseCase {
       geocodeResult.solvedCity, shortId
     );
 
+    if ( !order ) {
+      throw new Error("Unable to create order");
+    }
+
+    const user = await this.userRepository.findById( order.getSenderId() );
+
+    if ( !user ) {
+      throw new Error("Couldn\'t retrieve sender user");
+    }
+
     const emailStatus = await this.mailService.mailTo(
-      'test', '<p1>This is an email to prove its worth it</p1>', 'edgardanielgd123@gmail.com'
+      `Shipment Order Created`,
+      `<p1>Order with Id <b>${order.getShortId()}</b></p1> is created. State: <b>${order.getStatus()}</b>`,
+      `${user.getEmail()}`
     );
 
     if ( !emailStatus ) {

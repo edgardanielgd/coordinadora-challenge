@@ -34,8 +34,23 @@ export class AuthService implements IAuthService {
 
         const jwtData : JwtPayload = <JwtPayload>data;
 
+        const userData = jwtData['user'];
+        const user = new User(
+            userData.id,
+            userData.username,
+            userData.document,
+            userData.documentType,
+            userData.password,
+            userData.email,
+            userData.status,
+            userData.firstName,
+            userData.secondName,
+            userData.firstSurname,
+            userData.secondSurname
+          );
+
         const payload : AuthPayload = {
-            user : <User>jwtData['user'],
+            user : user,
             roles : jwtData['roles'],
         }
 

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../../services/AuthService';
+import { error } from 'console';
 
 export const authorize = (
     authService: AuthService, requiredRoles : string[]

@@ -17,7 +17,8 @@ export const authenticate = (authService: AuthService) : any => {
         return res.status(401).json({ message: 'Missing or invalid token' });
       }
 
-      res.locals.user = userClaims;
+      res.locals.claims = userClaims;
+
       next();
     } catch (err) {
       return res.status(401).json({ message: 'Unauthorized' });
